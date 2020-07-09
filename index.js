@@ -12,37 +12,52 @@ server.use(express.json());
 
 server.post('/api/users', (req, res) => {
     const userInfo = req.body
-    userInfo.id = shortid.generate();
-    users.push(userInfo);
-    console.log(req.body);
-    if(userInfo.body.name || userInfo.body.bio == null){
-        res.status(400).json({ errorMessage: "Please provide name and bio for the user." })
-    } else {
-    res.status(201).json(users)}
-});
+
+    const bodyKeys = Object.keys(userInfo);
+    try{
+        if(bodyKeys.length == 3){
+            userInfo.id = shortid.generate();
+            users.push(userInfo);
+            res.status(201).json(userInfo)
+        } else { res.status(400).json({errorMessage: "Please provide name and bio for the user."})
+        }
+    } catch (err) {
+        res.status(500).json({ errorMessage: "There was an error while saving the user to the database"})}
+    }        
+)
+
+
 
 server.get("/api/users", (req,res) => {
+    if(users.length !== 0) {
     res.status(201).json(users)
+    } else {res.status(500).json({ errorMessage: "The users information could not be retrieved." })}
 })
 
 server.get("/api/users/:id", (req,res) => {
     const { id } = req.params;
     const userInfo = users.find(user => user.id == id)
 
-    if(userInfo) {
-    res.status(201).json(userInfo)
-    } else { res.status(404).json({message: "Something is wrong."})}
+    try{
+        if(userInfo) {
+        res.status(201).json(userInfo)
+        } else { res.status(404).json({ message: "The user with the specified ID does not exist." })}
+        } catch (err) {
+        res.status(500).json({ errorMessage: "The user information could not be retrieved." })
+    }
 })
 
 server.delete("/api/users/:id", (req,res) => {
     const { id } = req.params;
     const deleted = users.find(user => user.id == id);
     
-    if(deleted) {
+    try{
+        if(deleted) {
         users = users.filter(user => user.id !== id);
         res.status(201).json(deleted);
-    } else {
-        res.status(404).json({message: "user not found"})
+        } else { res.status(404).json({ message: "The user with the specified ID does not exist." })
+        }} catch (err) { 
+        res.status(500).json({ errorMessage: "The user could not be removed" })
     }
 })
 
@@ -55,18 +70,22 @@ server.put("/api/users/:id", (req, res) => {
         // Finds the id for the user located in the array and asigns it to variable 'index'.
     let index = users.findIndex(user => user.id === id);
         // Checks if index exists... basically
-    if(index !== -1){
+        console.log(id)
+        console.log(index)
+    try{
+        if(index === -1){
+            res.status(400).json({ message: "The user with the specified ID does not exist." })
+        } else {
             // Assigns the id from req.params to the userChange object
-        userChange.id == id;
-            // Assign the changes to the object in the array it us changing out. (Uses the index to locate)
-        users[index] = userChange;
+            userChange.id == id;
+            // Assign the changes to the object in the array it is changing out. (Uses the  index to locate)
+            users[index] = userChange;
             // Returns response to client that is the changed object from the array... after it's been changed.
-        res.status(201).json(users[index])
-    } else {
-            // Returns 404 with error message if the user has not been updated.
-        res.status(404).json({ message: "User not updated"})
-
-    }
+        res.status(201).json(users[index])}
+        } catch (err) {
+        // Returns 404 with error message if the user has not been updated.
+        res.status(500).json({ errorMessage: "The user information could not be modified." })
+    } 
 })
 
 server.listen(8000, () => console.log('API running on port 8000'));
