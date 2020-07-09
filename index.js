@@ -70,19 +70,21 @@ server.put("/api/users/:id", (req, res) => {
         // Finds the id for the user located in the array and asigns it to variable 'index'.
     let index = users.findIndex(user => user.id === id);
         // Checks if index exists... basically
-        console.log(id)
-        console.log(index)
     try{
         if(index === -1){
             res.status(400).json({ message: "The user with the specified ID does not exist." })
-        } else {
+        } else if (!userChange.name || !userChange.bio){
+            res.status(400).json({ message: "Please provide name and bio for the user."}
+            )
+        } else {{
             // Assigns the id from req.params to the userChange object
             userChange.id == id;
             // Assign the changes to the object in the array it is changing out. (Uses the  index to locate)
             users[index] = userChange;
             // Returns response to client that is the changed object from the array... after it's been changed.
         res.status(201).json(users[index])}
-        } catch (err) {
+        } }
+        catch (err) {
         // Returns 404 with error message if the user has not been updated.
         res.status(500).json({ errorMessage: "The user information could not be modified." })
     } 
