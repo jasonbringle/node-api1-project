@@ -1,6 +1,7 @@
 // require the express npm module, needs to be added to the project using "npm install express"
 const express = require('express');
 const shortid = require('shortid');
+const cors = require('cors')
 
 
 // creates an express application using the express module
@@ -8,6 +9,7 @@ const server = express();
 let users = [];
 
 server.use(express.json());
+server.use(cors());
 
 
 server.post('/api/users', (req, res) => {
